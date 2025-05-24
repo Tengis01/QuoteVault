@@ -70,8 +70,10 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: tengis01/quotes-backend:latest
+          tags: monarchhh/quotes-backend:latest
           platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -79,5 +81,60 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: tengis01/quotes-frontend:latest
+          tags: monarchhh/quotes-frontend:latest
           platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
+            # Сервер дээрх ажлын хавтас
+            DEPLOY_DIR=/home/$SERVER_USER/quotes-vault
+            mkdir -p $DEPLOY_DIR
+
+            # Docker Hub-аас шинэ image-уудыг татах
+            docker pull monarchhh/quotes-backend:latest
+            docker pull monarchhh/quotes-frontend:latest
+
+            # docker-compose.yml файлыг хуулах эсвэл шинэчлэх
+            cd $DEPLOY_DIR
+            cat << 'EOT' > docker-compose.yml
+            version: '3.8'
+            services:
+              backend:
+                image: monarchhh/quotes-backend:latest
+                ports:
+                  - "5000:5000"
+                environment:
+                  - MYSQL_HOST=sqlite
+                  - MYSQL_DATABASE=/app/quotes.db
+                volumes:
+                  - ./quotes.db:/app/quotes.db
+              frontend:
+                image: monarchhh/quotes-frontend:latest
+                ports:
+                  - "3000:3000"
+                depends_on:
+                  - backend
+            EOT
+
+            # Docker Compose ашиглан deploy хийх
+            docker-compose down
+            docker-compose up -d --build
+          EOF

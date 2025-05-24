@@ -1,0 +1,24 @@
+# Python
+   __pycache__/
+   *.pyc
+   *.pyo
+   *.pyd
+   .Python
+   env/
+   venv/
+   *.env
+
+   # Docker
+   *.log
+   docker-compose.override.yml
+   /backend/test_quotes.db
+
+   # MySQL data volume
+   db_data/
+
+   # IDE files
+   .vscode/
+   .idea/
+
+   # CI/CD logs
+   *.log

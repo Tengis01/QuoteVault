@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эшлэлийн Апликейшн</title>
+    <style>
+        body {
+            background-color: #FFFDD0; /* Цөцгий цагаан дэвсгэр */
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 20px;
+        }
+        button {
+            background-color: #ADD8E6; /* Цайвар цэнхэр */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #87CEEB;
+        }
+        #quote {
+            margin-top: 20px;
+            font-style: italic;
+        }
+        #author {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Та товч дараад эшлэл авна уу</h2>
+        <button onclick="fetchQuote()">Дар</button>
+        <p id="quote"></p>
+        <p id="author"></p>
+    </div>
+    <script>
+        async function fetchQuote() {
+            try {
+                const response = await fetch('http://localhost:5000/quotes/random');
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('quote').textContent = data.quote;
+                    document.getElementById('author').textContent = `- ${data.author}`;
+                } else {
+                    document.getElementById('quote').textContent = 'Эшлэл олдсонгүй';
+                    document.getElementById('author').textContent = '';
+                }
+            } catch (error) {
+                document.getElementById('quote').textContent = 'Алдаа гарлаа';
+                document.getElementById('author').textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>

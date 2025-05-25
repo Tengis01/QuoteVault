@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'backend/**'
       - 'frontend/**'
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/**'
   pull_request:
     branches:
-      - main
+      - master
     paths:
       - 'backend/**'
       - 'frontend/**'
@@ -45,7 +45,7 @@ jobs:
   build-and-push:
     needs: test-backend
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 
     steps:
       - name: Checkout code
